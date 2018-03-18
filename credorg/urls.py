@@ -11,5 +11,5 @@ urlpatterns += [
     url(r'^accounts/login/', login_view),
     url(r'^api-auth/', include('rest_framework.urls')),
     url(r'^admin/', admin.site.urls),
-    url(r'^API/V1/', include_docs_urls(title='Credit Organization API'))
+    url(r'^', include_docs_urls(title='Credit Organization API'))
 ]
