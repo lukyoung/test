@@ -39,7 +39,7 @@ Start server:
 
 Open in browser link:  [http://localhost:8888/](http://localhost:8888/)
 
-Before begining test the API methods you have to obtain a Token key.
+Before beginning test the API methods you have to obtain a Token key.
 Go to [CreditOrganization](http://localhost:8888/admin/offer/creditorganization/)
 model and select any username - it is the password too (equal).
 
