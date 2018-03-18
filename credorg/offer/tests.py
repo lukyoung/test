@@ -1,10 +1,19 @@
 import names
+import logging
+import pytest
+from django.utils import timezone
 from django.test import TestCase
+from django.conf import settings
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
 from .utils import FixturesGenerator
 from .models import User, Order
+from tasks import send_to_credorg
+
+
+settings.CELERY_ALWAYS_EAGER = True
+log = logging.getLogger('file')
 
 
 class CreditOrganizationTestCase(TestCase):
@@ -15,7 +24,7 @@ class CreditOrganizationTestCase(TestCase):
     def test_get_token_no_token_error(self):
         """
         Checks an exception when token not defined
-        :return: 
+        :return:
         """
         name = names.get_full_name()
         user = User.objects.create(username=name)
@@ -35,7 +44,7 @@ class CreditOrganizationTestCase(TestCase):
     def test_get_token_success(self):
         """
         Checks the token
-        :return: 
+        :return:
         """
         name = names.get_full_name()
         user = User.objects.create(username=name)
@@ -54,8 +63,8 @@ class CreditOrganizationTestCase(TestCase):
 
     def test_create_worksheet_by_parnter_unauthorized(self):
         """
-        Checks unauthorized request: not Token in headers 
-        :return: 
+        Checks unauthorized request: not Token in headers
+        :return:
         """
         client = APIClient()
         res = client.post('/API/V1/Partner/Worksheets/', {}, format='json')
@@ -289,3 +298,8 @@ class CreditOrganizationTestCase(TestCase):
 
         self.assertEqual(res.status_code, 200)
 
+    @pytest.mark.celery(result_backend=settings.BROKER_URL)
+    def test_celery_send(self):
+        log.warning('-- test_celery_send initializing: {}'.format(timezone.now()))
+        send_to_credorg.delay("1", "2")
+        log.warning('-- test_celery_send initialized: {}'.format(timezone.now()))

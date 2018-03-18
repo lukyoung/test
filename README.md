@@ -36,3 +36,18 @@ Perform tests:
 Start server:
 
     $ ./manage.py runserver 8888
+
+Open in browser link:  [http://localhost:8888/](http://localhost:8888/)
+
+Before begining test the API methods you have to obtain a Token key.
+Go to [CreditOrganization](http://localhost:8888/admin/offer/creditorganization/)
+model and select any username - it is the password too (equal).
+
+Go to the Users section: get_token.
+Press interact, enter the username and password.
+Copy the token.
+
+Go to Left Menu -> Authentication: set `token`, Scheme: `Token`, Token: `paste from clipboard`
+
+Ok! You can test other methods with Token Authorization.
+

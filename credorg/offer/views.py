@@ -10,6 +10,7 @@ from .permissions import IsPartnerUser, IsPartnerOrder, \
     IsCreditOrganizationUser, IsCreditOrganizationOrder
 from .schemes import PartnerViewSchema, CreditOrganizationViewSchema, \
     AuthViewSchema
+from .tasks import send_to_credorg
 
 
 class AuthView(viewsets.ViewSet):
@@ -98,6 +99,7 @@ class PartnersViewSet(viewsets.ViewSet):
 
         # sending order to the credit organization: by email or others ways
         order.send()  # update sent field by now()
+        send_to_credorg.delay(order, request.user)
 
         return Response(dict(status=True, order=OrderSerializer(order).data))
 
