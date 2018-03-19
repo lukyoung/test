@@ -45,50 +45,43 @@ class PartnerViewSchema(AutoSchema):
                     url=path,
                     fields=[
                         coreapi.Field(
-                            "rotation_from",
-                            description="Rotation from",
+                            "last_name",
                             required=True,
                             location="form",
                             schema=coreschema.String()
                         ),
                         coreapi.Field(
-                            "rotation_to",
-                            description="Rotation to",
+                            "first_name",
                             required=True,
                             location="form",
                             schema=coreschema.String()
                         ),
                         coreapi.Field(
-                            "name",
-                            description="Name",
+                            "middle_name",
                             required=True,
                             location="form",
                             schema=coreschema.String()
                         ),
                         coreapi.Field(
-                            "offer_type",
-                            description="Offer type",
+                            "dob",
                             required=True,
                             location="form",
-                            schema=coreschema.Integer()
+                            schema=coreschema.String()
                         ),
                         coreapi.Field(
-                            "score_min",
-                            description="Score Min",
+                            "phone_number",
                             required=True,
                             location="form",
-                            schema=coreschema.Integer()
+                            schema=coreschema.String()
                         ),
                         coreapi.Field(
-                            "score_max",
-                            description="Score Max",
+                            "passport_number",
                             required=True,
                             location="form",
-                            schema=coreschema.Integer()
+                            schema=coreschema.String()
                         ),
                         coreapi.Field(
-                            "credit_organization",
-                            description="Credit organization Id",
+                            "score",
                             required=True,
                             location="form",
                             schema=coreschema.Integer()
@@ -155,6 +148,51 @@ class CreditOrganizationViewSchema(AutoSchema):
                         ),
                         coreapi.Field(
                             "status",
+                            required=True,
+                            location="form",
+                            schema=coreschema.Integer()
+                        ),
+                    ]
+                )
+
+        elif method == 'POST':
+            if path.strip('/').endswith('Offers'):
+                return coreapi.Link(
+                    action='post',
+                    url=path,
+                    fields=[
+                        coreapi.Field(
+                            "rotation_from",
+                            required=True,
+                            location="form",
+                            schema=coreschema.String()
+                        ),
+                        coreapi.Field(
+                            "rotation_to",
+                            required=True,
+                            location="form",
+                            schema=coreschema.String()
+                        ),
+                        coreapi.Field(
+                            "name",
+                            required=True,
+                            location="form",
+                            schema=coreschema.String()
+                        ),
+                        coreapi.Field(
+                            "offer_type",
+                            required=True,
+                            location="form",
+                            schema=coreschema.Integer()
+                        ),
+                        coreapi.Field(
+                            "score_min",
+                            required=True,
+                            location="form",
+                            schema=coreschema.Integer()
+                        ),
+                        coreapi.Field(
+                            "score_max",
                             required=True,
                             location="form",
                             schema=coreschema.Integer()

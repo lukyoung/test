@@ -202,18 +202,21 @@ class FixturesGenerator(object):
         :param orders: 
         :return: 
         """
-        sent_range = (None, timezone.now())
         passed = []
+        status_list = [s[0] for s in Order.STATES]
         for i in range(orders):
             worksheet = random.sample(self.WORKSHEETS_LIST, 1)[0]
             offer = random.sample(self.OFFERS_LIST, 1)[0]
+
             if (worksheet, offer) in passed:
                 continue
+
+            status = random.sample(status_list, 1)[0]
             Order.objects.create(
-                sent=random.sample(sent_range, 1)[0],
+                sent=timezone.now() if status > 1 else None,
                 worksheet=worksheet,
                 offer=offer,
-                status=random.sample([s[0] for s in Order.STATES], 1)[0]
+                status=status
             )
             passed.append((worksheet, offer))
 

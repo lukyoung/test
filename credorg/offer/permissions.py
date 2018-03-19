@@ -1,5 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 from rest_framework.permissions import BasePermission
+from django.db.models import ObjectDoesNotExist
 
 from .models import Partner, Order, CreditOrganization
 
@@ -26,7 +27,7 @@ class IsCreditOrganizationUser(BasePermission):
         if not user or not user.is_authenticated:
             return False
         return user.is_superuser or \
-               CreditOrganization.objects.filter(user=request.user).exists()
+            CreditOrganization.objects.filter(user=request.user).exists()
 
 
 class IsPartnerOrder(BasePermission):
@@ -42,10 +43,21 @@ class IsPartnerOrder(BasePermission):
         if user.is_superuser:
             return True
 
-        order = Order.objects.get(id=request.data['order'])
-        partner = Partner.objects.get(user=request.user)
-        if order.worksheet.partner != partner:
+        try:
+            order = Order.objects.get(id=request.data['order'])
+        except ObjectDoesNotExist:
             return False
+
+        else:
+            try:
+                partner = Partner.objects.get(user=request.user)
+            except ObjectDoesNotExist:
+                return False
+
+            else:
+                if order.worksheet.partner != partner:
+                    return False
+
         return True
 
 
@@ -62,8 +74,19 @@ class IsCreditOrganizationOrder(BasePermission):
         if user.is_superuser:
             return True
 
-        order = Order.objects.get(id=request.data['order'])
-        co = CreditOrganization.objects.get(user=request.user)
-        if order.offer.credit_organization != co:
+        try:
+            order = Order.objects.get(id=request.data['order'])
+        except ObjectDoesNotExist:
             return False
+
+        else:
+            try:
+                co = CreditOrganization.objects.get(user=request.user)
+            except ObjectDoesNotExist:
+                return False
+
+            else:
+                if order.offer.credit_organization != co:
+                    return False
+
         return True

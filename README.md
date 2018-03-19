@@ -19,25 +19,29 @@ Get the project sources from the Git repository:
 Install project requirements:
 
     $ source venv/bin/activate
-    $ pip install -r src/requirements.txt
+    (venv) $ pip install -r src/requirements.txt
 
 Apply the migrations
 
-    $ cd /path/of/project/sources/
-    $ ./manage.py migrate
-    $ ./manage.py collectstatic
+    (venv) $ cd /path/of/project/sources/
+    (venv) $ ./manage.py migrate
+    (venv) $ ./manage.py collectstatic
 
 Generate test data:
 
-    $ ./manage.py generate_test_data
+    (venv) $ ./manage.py generate_test_data
 
 Perform tests:
 
-    $ ./manage.py test credorg.offer.tests.CreditOrganizationTestCase
+    (venv) $ ./manage.py test credorg.offer.tests.CreditOrganizationTestCase
 
 Start server:
 
-    $ ./manage.py runserver 8888
+    (venv) $ ./manage.py runserver 8888
+
+Run CeleryD daemon:
+
+    (venv) $ celery -A credorg worker
 
 Open in browser link:  [http://localhost:8888/](http://localhost:8888/)
 
@@ -52,4 +56,16 @@ Copy the token.
 Go to Left Menu -> Authentication: set `token`, Scheme: `Token`, Token: `paste from clipboard`
 
 Ok! You can test other methods with Token Authorization.
+
+
+
+# Releases:
+
+    # 2018-03-19 18:45 (MSK):
+      - PartnerViewSchema Worksheets action: fields are described by the model ClientWorksheet;
+      - generated Order.sent = None if status > 1;
+      - ClientWorksheet.dob field type changed from DateTimeField to DateField;
+      - Extended an API for Credit Organizations with new one: create Offer.
+
+
 
