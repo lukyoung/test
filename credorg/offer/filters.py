@@ -1,16 +1,18 @@
+from __future__ import absolute_import, unicode_literals
+from copy import deepcopy
 from django.conf import settings
 from django.contrib import admin
 from django.db.models import Min, Max
 from django.utils.translation import ugettext_lazy as _
 
-from .models import Offer, CreditOrganization, Partner
+from .models import Offer, CreditOrganization, Partner, ClientWorksheet
 
 
 class ScoresFilter(admin.SimpleListFilter):
     title = _('Scores')
     parameter_name = 'score'
 
-    def _score_min_max_range(self, model):
+    def _score_min_max_range(self):
         """
         Returns result of the performing of SQL: 
             select min(score), max(score)
@@ -18,37 +20,40 @@ class ScoresFilter(admin.SimpleListFilter):
         :param model: ClientWorksheet
         :return: {'score_min': int, 'score_max': int}
         """
-        score_min_max = model.objects.all().annotate(
-            score_min=Min('score'),
-            score_max=Max('score')
-        )
+        score_min_max = ClientWorksheet.objects.aggregate(
+            Min('score'), Max('score'))
+
+        if not score_min_max:
+            return []
+
         return list(range(
-            score_min_max['score_min'],
-            score_min_max['score_max'] + 1,
-            settings.SCORE_FILTER_SIZE
+            score_min_max['score__min'],
+            score_min_max['score__max'] + 1,
+            100/settings.SCORE_FILTER_SIZE
         ))
 
     def lookups(self, request, model_admin):
-        score_min_max_range = self._score_min_max_range(model_admin)
+        a = map(str, self._score_min_max_range())
+        b = deepcopy(a)
+        b.pop(0)
+        score_min_max_range = zip(a, b)
+
         score_ranges = []
-        score_from = score_min_max_range[0]
-        for i in score_min_max_range:
-            score_ranges.append(
-                ('{}:{}'.format(score_from, i), '{} - {}'.format(score_from, i))
-            )
-            score_from = i
+        for r in score_min_max_range:
+            score_ranges.append((':'.join(r), ' - '.join(r)))
 
         return score_ranges
 
     def queryset(self, request, queryset):
-        score_min_max_range = self._score_min_max_range(queryset.model)
-        score_min = score_min_max_range[0]
-        score_max = score_min_max_range[-1]
+        if not self.value():
+            return queryset
+
+        score_min , score_max = self.value().split(':')
         return queryset.filter(score__gte=score_min, score__lte=score_max)
 
 
 class OfferFilter(admin.SimpleListFilter):
-    title = _('Offer')
+    title = _('Offer A-Z')
     parameter_name = 'offer'
 
     def lookups(self, request, model_admin):
@@ -67,7 +72,6 @@ class OfferFilter(admin.SimpleListFilter):
         return offers
 
     def queryset(self, request, queryset):
-        raise Exception(self.value())
         v = self.value()
         if not v:
             return queryset

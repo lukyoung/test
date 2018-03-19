@@ -1,3 +1,4 @@
+from __future__ import absolute_import, unicode_literals
 from django.contrib.auth import authenticate
 from rest_framework import viewsets, status, authentication
 from rest_framework.decorators import list_route

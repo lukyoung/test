@@ -1,9 +1,11 @@
 
 # Dependencies:
-Debian/Ubuntu hosts:
+Debian/Ubuntu hosts
+(try to solve any dependencies problems with OS modules if they were appeared):
 
     $ sudo apt-get install python python-dev
     $ sudo apt-get install virtualenv
+    $ sudo apt-get install redis-server
 
 # Installation and running:
 Install a Python Virtual Environment:

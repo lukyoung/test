@@ -1,3 +1,4 @@
+from __future__ import absolute_import, unicode_literals
 import names
 import logging
 import pytest
@@ -9,7 +10,7 @@ from rest_framework.test import APIClient
 
 from .utils import FixturesGenerator
 from .models import User, Order
-from tasks import send_to_credorg
+from .tasks import send_to_credorg
 
 
 settings.CELERY_ALWAYS_EAGER = True

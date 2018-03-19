@@ -1,3 +1,4 @@
+from __future__ import absolute_import, unicode_literals
 from rest_framework.permissions import BasePermission
 
 from .models import Partner, Order, CreditOrganization

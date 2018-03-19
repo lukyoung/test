@@ -1,3 +1,4 @@
+from __future__ import absolute_import, unicode_literals
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
@@ -138,7 +139,7 @@ class Order(models.Model):
         unique_together = ('worksheet', 'offer')
 
     def __str__(self):
-        return dict(self.STATES)[self.status]
+        return str(dict(self.STATES)[self.status])
 
     def send(self):
         self.sent = timezone.now()

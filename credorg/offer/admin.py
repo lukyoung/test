@@ -1,8 +1,16 @@
+from __future__ import absolute_import, unicode_literals
 from django.contrib import admin
 from rest_framework.authtoken.models import Token
 
 from .models import CreditOrganization, Partner, Offer, ClientWorksheet, Order
 from .filters import ScoresFilter, OfferFilter, COUserFilter, PartnerUserFilter
+
+
+class SuperuserAdminBase(admin.ModelAdmin):
+    def get_readonly_fields(self, request, obj=None):
+        if request.user.is_superuser:
+            return []
+        return super(SuperuserAdminBase, self).get_readonly_fields(request, obj)
 
 
 class OfferInline(admin.TabularInline):
@@ -15,7 +23,7 @@ class OfferInline(admin.TabularInline):
 
 
 @admin.register(CreditOrganization)
-class CreditOrganizationAdmin(admin.ModelAdmin):
+class CreditOrganizationAdmin(SuperuserAdminBase):
     list_display = ('pk', 'user', 'name', 'token_repr')
     fields = ('user', 'name',)
     list_filter = (COUserFilter,)
@@ -38,7 +46,7 @@ class ClientWorksheetInline(admin.TabularInline):
 
 
 @admin.register(Partner)
-class PartnerAdmin(admin.ModelAdmin):
+class PartnerAdmin(SuperuserAdminBase):
     list_display = ('pk', 'user', 'name', 'token_repr')
     fields = ('user', 'name',)
     list_filter = (PartnerUserFilter,)
@@ -52,7 +60,7 @@ class PartnerAdmin(admin.ModelAdmin):
 
 
 @admin.register(Offer)
-class OfferAdmin(admin.ModelAdmin):
+class OfferAdmin(SuperuserAdminBase):
     list_display = ('pk', 'created', 'modified', 'name', 'rotation_from',
                     'rotation_to', 'offer_type', 'score_min', 'score_max',
                     'credit_organization')
@@ -65,7 +73,7 @@ class OfferAdmin(admin.ModelAdmin):
 
 
 @admin.register(ClientWorksheet)
-class ClientWorksheetAdmin(admin.ModelAdmin):
+class ClientWorksheetAdmin(SuperuserAdminBase):
     list_display = ('pk', 'partner', 'created', 'modified', 'fio_repr', 'dob',
                     'phone_number', 'passport_number', 'score')
     readonly_fields = ('phone_number', 'passport_number',)
@@ -81,11 +89,11 @@ class ClientWorksheetAdmin(admin.ModelAdmin):
 
 
 @admin.register(Order)
-class OrderAdmin(admin.ModelAdmin):
+class OrderAdmin(SuperuserAdminBase):
     list_display = ('pk', 'created', 'sent', 'worksheet', 'offer', 'status',)
     readonly_fields = ('sent', 'worksheet', 'offer',)
     fields = ('sent', 'worksheet', 'offer', 'status')
-    list_filter = ('offer', OfferFilter)
+    list_filter = ('offer', OfferFilter, 'worksheet', 'status')
     raw_id_fields = ('offer', 'worksheet')
     search_fields = (
         'worksheet__last_name', 'worksheet__first_name',
@@ -95,3 +103,4 @@ class OrderAdmin(admin.ModelAdmin):
         # 'offer__credit_organization__name' # this field may reduce the
         # filtering time
     )
+

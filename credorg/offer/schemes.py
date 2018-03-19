@@ -1,3 +1,4 @@
+from __future__ import absolute_import, unicode_literals
 import coreapi
 from rest_framework.compat import coreschema
 from rest_framework.schemas import AutoSchema
