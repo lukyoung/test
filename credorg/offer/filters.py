@@ -36,13 +36,7 @@ class ScoresFilter(admin.SimpleListFilter):
         a = map(str, self._score_min_max_range())
         b = deepcopy(a)
         b.pop(0)
-        score_min_max_range = zip(a, b)
-
-        score_ranges = []
-        for r in score_min_max_range:
-            score_ranges.append((':'.join(r), ' - '.join(r)))
-
-        return score_ranges
+        return [(':'.join(r), ' - '.join(r)) for r in zip(a, b)]
 
     def queryset(self, request, queryset):
         if not self.value():
