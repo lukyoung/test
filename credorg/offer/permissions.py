@@ -18,7 +18,7 @@ class IsPartnerUser(BasePermission):
 
 class IsCreditOrganizationUser(BasePermission):
     """
-    Allows access only to Partner users.
+    Allows access only to CreditOrganization users.
     """
 
     def has_permission(self, request, view):
@@ -51,7 +51,7 @@ class IsPartnerOrder(BasePermission):
 
 class IsCreditOrganizationOrder(BasePermission):
     """
-    Allows access only to Partner users.
+    Allows access only to CreditOrganization users.
     """
 
     def has_permission(self, request, view):

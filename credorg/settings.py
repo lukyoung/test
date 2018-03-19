@@ -189,6 +189,6 @@ SCORE_FILTER_SIZE = 5
 BROKER_URL = 'redis://localhost:6379/0'
 
 try:
-    from celery_settings import *
+    from celery import *
 except ImportError:
     pass
