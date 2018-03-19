@@ -65,6 +65,7 @@ class PartnersViewSet(viewsets.ViewSet):
 
         elif request.method == 'GET':
             worksheets_list = partner.worksheets_list.select_related()
+
             serializer = WorksheetSerializer(worksheets_list, many=True)
 
             return Response(serializer.data)

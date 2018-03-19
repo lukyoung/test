@@ -126,6 +126,71 @@ class PartnerViewSchema(AutoSchema):
                     ]
                 )
 
+        elif method == 'GET':
+            if path.strip('/').endswith('Worksheets'):
+                return coreapi.Link(
+                    action='get',
+                    url=path,
+                    description="""
+                    Use model kind filter:
+                    __exact,
+                    __startswith,
+                    __in,
+                    __gte, __gt, __lte, __lt,
+                    ...
+                    """,
+                    fields=[
+                        coreapi.Field(
+                            "last_name",
+                            required=False,
+                            location="query",
+                            schema=coreschema.String()
+                        ),
+                        coreapi.Field(
+                            "first_name",
+                            required=False,
+                            location="query",
+                            schema=coreschema.String()
+                        ),
+                        coreapi.Field(
+                            "middle_name",
+                            required=False,
+                            location="query",
+                            schema=coreschema.String()
+                        ),
+                        coreapi.Field(
+                            "dob",
+                            required=False,
+                            location="query",
+                            schema=coreschema.String()
+                        ),
+                        coreapi.Field(
+                            "phone_number",
+                            required=False,
+                            location="query",
+                            schema=coreschema.String()
+                        ),
+                        coreapi.Field(
+                            "passport_number",
+                            required=False,
+                            location="query",
+                            schema=coreschema.String()
+                        ),
+                        coreapi.Field(
+                            "score",
+                            required=False,
+                            location="query",
+                            schema=coreschema.Integer()
+                        ),
+                        coreapi.Field(
+                            "order_by",
+                            required=False,
+                            location="query",
+                            schema=coreschema.String()
+                        ),
+                    ]
+                )
+
         return links
 
 
