@@ -86,7 +86,7 @@ class ClientWorksheet(models.Model):
     first_name = models.CharField(max_length=100)
     middle_name = models.CharField(max_length=100, blank=True, null=True)
 
-    dob = models.DateTimeField()
+    dob = models.DateField()
     phone_number = models.CharField(max_length=20, unique=True)
     passport_number = models.CharField(max_length=20, unique=True)
     score = models.PositiveIntegerField(default=0, blank=True)

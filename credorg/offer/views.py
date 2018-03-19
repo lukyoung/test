@@ -4,7 +4,7 @@ from rest_framework import viewsets, status, authentication
 from rest_framework.decorators import list_route
 from rest_framework.response import Response
 
-from .models import Partner, Order, CreditOrganization
+from .models import Partner, Order, CreditOrganization, Offer
 from .serializers import WorksheetSerializer, OrderSerializer,\
     OfferSerializer, GetTokenCredsSerializer
 from .permissions import IsPartnerUser, IsPartnerOrder, \
@@ -97,6 +97,8 @@ class PartnersViewSet(viewsets.ViewSet):
 
         data = request.data
         order = Order.objects.get(id=data['order'])
+        if order.status > Order.NEW:
+            return Response(dict(error='Order already sent!'))
 
         # sending order to the credit organization: by email or others ways
         order.send()  # update sent field by now()
@@ -111,26 +113,60 @@ class CreditOrganizationViewSet(viewsets.ViewSet):
     permission_classes = (IsCreditOrganizationUser,)
     schema = CreditOrganizationViewSchema()
 
-    @list_route(['get'], url_path='Offers', url_name='offers')
-    def get_offers(self, request):
+    @list_route(['get', 'post'], url_path='Offers', url_name='offers')
+    def offers(self, request):
         """
         Creates an offer
         """
 
-        co = CreditOrganization.objects.get(user=request.user)
-        offers_list = co.offers_list.select_related()
-        serializer = OfferSerializer(offers_list, many=True)
+        if request.method == 'POST':
+            co = CreditOrganization.objects.filter(user=request.user).first()
+            if not co:
+                return Response(dict(error='CreditOrganization not defined!'))
 
-        return Response(serializer.data)
+            data = request.data
+            data.update(dict(credit_organization=co.pk))
+            serializer = OfferSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+
+            return Response(serializer.data)
+
+        elif request.method == 'GET':
+            co = CreditOrganization.objects.filter(user=request.user).first()
+            if not co:
+                if request.user.is_superuser:
+                    offers_list = Offer.objects.all()
+                    serializer = OfferSerializer(offers_list, many=True)
+                    return Response(serializer.data)
+
+                else:
+                    return Response(dict(error='Current user is not related to '
+                                               'any CreditOrganization'), 403)
+
+            offers_list = co.offers_list.select_related()
+            serializer = OfferSerializer(offers_list, many=True)
+
+            return Response(serializer.data)
 
     @list_route(['get'], url_path='Orders', url_name='orders')
-    def get_orders(self, request):
+    def orders(self, request):
         """
         Returns orders list of CreditOrganization
         """
 
-        orders = CreditOrganization.objects.get(user=request.user).orders_list()
-        serializer = OrderSerializer(orders, many=True)
+        co = CreditOrganization.objects.filter(user=request.user).first()
+        if not co:
+            if request.user.is_superuser:
+                orders_list = Order.objects.all()
+                serializer = OrderSerializer(orders_list, many=True)
+                return Response(serializer.data)
+
+            else:
+                return Response(dict(error='Current user is not related to any '
+                                           'CreditOrganization'), 403)
+
+        serializer = OrderSerializer(co.orders_list(), many=True)
 
         return Response(serializer.data)
 
