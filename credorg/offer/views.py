@@ -1,10 +1,11 @@
 from __future__ import absolute_import, unicode_literals
 from django.contrib.auth import authenticate
+from django.db.models import ObjectDoesNotExist
 from rest_framework import viewsets, status, authentication
-from rest_framework.decorators import list_route
+from rest_framework.decorators import list_route, detail_route
 from rest_framework.response import Response
 
-from .models import Partner, Order, CreditOrganization, Offer
+from .models import Partner, Order, CreditOrganization, Offer, ClientWorksheet
 from .serializers import WorksheetSerializer, OrderSerializer,\
     OfferSerializer, GetTokenCredsSerializer
 from .permissions import IsPartnerUser, IsPartnerOrder, \
@@ -45,8 +46,19 @@ class PartnersViewSet(viewsets.ViewSet):
     permission_classes = (IsPartnerUser,)
     schema = PartnerViewSchema()
 
+    def _get_filters(self, request):
+        """
+        Obtain the filters list from the request.query_params
+        :param request: 
+        :return: 
+        """
+        params = {k: v[0] for k, v in dict(request.query_params.copy()).items()}
+        # process the params
+        order_by = params.pop('order_by', None)
+        return params, order_by
+
     @list_route(['post', 'get'], url_path='Worksheets', url_name='worksheets')
-    def worksheet(self, request):
+    def worksheets(self, request):
         """
         Creates a client worksheet
         """
@@ -66,9 +78,30 @@ class PartnersViewSet(viewsets.ViewSet):
         elif request.method == 'GET':
             worksheets_list = partner.worksheets_list.select_related()
 
+            filters, order_by = self._get_filters(request)
+            if filters:
+                worksheets_list = worksheets_list.filter(**filters)
+            if order_by:
+                worksheets_list = worksheets_list.order_by(order_by)
+
             serializer = WorksheetSerializer(worksheets_list, many=True)
 
             return Response(serializer.data)
+
+    @detail_route(['get'], url_path='Worksheet', url_name='worksheets')
+    def get_worksheet(self, request, pk):
+        """
+        Get the client worksheet by Id
+        """
+
+        try:
+            worksheet = ClientWorksheet.objects.get(
+                partner__user=request.user, pk=pk)
+        except ObjectDoesNotExist:
+            return Response(dict(error='Worksheet not found!'), 404)
+
+        else:
+            return Response(WorksheetSerializer(worksheet).data)
 
     @list_route(['post', 'get'], url_path='Orders', url_name='orders')
     def order(self, request):
@@ -170,6 +203,21 @@ class CreditOrganizationViewSet(viewsets.ViewSet):
         serializer = OrderSerializer(co.orders_list(), many=True)
 
         return Response(serializer.data)
+
+    @detail_route(['get'], url_path='Order', url_name='orders')
+    def get_order(self, request, pk):
+        """
+        Get the Order by Id
+        """
+
+        try:
+            order = Order.objects.get(
+                offer__credit_organization__user=request.user, pk=pk)
+        except ObjectDoesNotExist:
+            return Response(dict(error='Order not found!'), 404)
+
+        else:
+            return Response(OrderSerializer(order).data)
 
     @list_route(['put'], url_path='Status', url_name='update-order-status',
                 permission_classes=[IsCreditOrganizationOrder])

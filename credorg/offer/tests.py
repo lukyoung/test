@@ -304,3 +304,71 @@ class CreditOrganizationTestCase(TestCase):
         log.warning('-- test_celery_send initializing: {}'.format(timezone.now()))
         send_to_credorg.delay("1", "2")
         log.warning('-- test_celery_send initialized: {}'.format(timezone.now()))
+
+    def test_scenario_1(self):
+        self.fg.clear_db()
+        co = self.fg.generate_cred_orgs(1)[0]
+        offer = self.fg.generate_offers(1)[0]
+        offer.credit_organization = co
+        offer.save()
+
+        # create Partner
+
+        partner = self.fg.generate_partners(1)[0]
+        token = Token.objects.get(user=partner.user)
+
+        name = self.fg.gen_name()
+        first_name, last_name = name.split()
+        score = self.fg.gen_score()
+        phone_number = self.fg.gen_phone_number()
+        passport_number = self.fg.gen_passport_number()
+
+        data = dict(
+            last_name=last_name,
+            first_name=first_name,
+            dob=self.fg.gen_dob(),
+            phone_number=phone_number,
+            passport_number=passport_number,
+            score=score
+        )
+
+        client = APIClient()
+        client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        res = client.post('/API/V1/Partner/Worksheets/', data, format='json')
+
+        # create Order
+
+        worksheet = res.data['id']
+        data = dict(worksheet=worksheet, offer=offer.id)
+        client = APIClient()
+        client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        res = client.post('/API/V1/Partner/Orders/', data, format='json')
+
+        order = res.data['id']
+
+        # send created Order to the CreditOrganization
+
+        data = dict(order=order, offer=offer.id)
+        client = APIClient()
+        client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        client.post('/API/V1/Partner/SendOrder/', data, format='json')
+
+        # update Order by CreditOrganization
+
+        token = Token.objects.get(user=co.user)
+
+        data = dict(
+            order=order,
+            status=Order.RECEIVED
+        )
+
+        client = APIClient()
+        client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        res = client.put('/API/V1/CreditOrganization/Status/', data,
+                          format='json')
+
+        self.assertEqual(res.status_code, 200)
+
+
+
+

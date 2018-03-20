@@ -33,6 +33,7 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = ('id', 'sent', 'worksheet', 'offer', 'status')
+        depth = 1
 
 
 class GetTokenCredsSerializer(serializers.Serializer):

@@ -53,7 +53,7 @@ class FixturesGenerator(object):
                 random.sample(range(1950, year), 1)[0],
                 random.sample(range(1, 13), 1)[0],
                 random.sample(range(1, 29), 1)[0]
-            ))
+            )).date()
 
     def gen_phone_number(self):
         return '79{}'.format(''.join(

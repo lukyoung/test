@@ -65,7 +65,10 @@ Ok! You can test other methods with Token Authorization.
       - PartnerViewSchema Worksheets action: fields are described by the model ClientWorksheet;
       - generated Order.sent = None if status > 1;
       - ClientWorksheet.dob field type changed from DateTimeField to DateField;
-      - Extended an API for Credit Organizations with new one: create Offer.
+      - Extended an API for Credit Organizations with: POST Offer;
+      - Extended an API for Credit Organizations with: GET Order by PK;
+      - Extended an API for Partners with: GET Worksheet by PK;
+      - Added test case `test_scenario_1`.
 
 
 
