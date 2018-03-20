@@ -17,6 +17,6 @@ def send_to_credorg(task, order, user):
     :return: 
     """
     t = time.time()
-    time.sleep(5)
+    time.sleep(2)
     log.warning('test send_to_credorg: {}\n{}\n{}\n{}\n'.format(
         time.time() - t, task, order, user))

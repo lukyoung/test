@@ -55,10 +55,10 @@ class IsPartnerOrder(BasePermission):
                 return False
 
             else:
-                if order.worksheet.partner != partner:
-                    return False
+                if order.worksheet.partner_id == partner.id:
+                    return True
 
-        return True
+        return False
 
 
 class IsCreditOrganizationOrder(BasePermission):
@@ -86,7 +86,7 @@ class IsCreditOrganizationOrder(BasePermission):
                 return False
 
             else:
-                if order.offer.credit_organization != co:
-                    return False
+                if order.offer.credit_organization_id == co.id:
+                    return True
 
-        return True
+        return False

@@ -131,7 +131,7 @@ class FixturesGenerator(object):
 
         return partners_list
 
-    def generate_offers(self, offers):
+    def generate_offers(self, offers, co=None):
         """
         fill Offer table
         :param offers: 
@@ -154,7 +154,8 @@ class FixturesGenerator(object):
                 offer_type=self.OFFER_TYPES[0],
                 score_min=score_min,
                 score_max=score_max,
-                credit_organization=random.sample(self.CRED_ORGS_LIST, 1)[0],
+                credit_organization=co or random.sample(
+                    self.CRED_ORGS_LIST, 1)[0],
             )
 
             offers_list.append(o)
@@ -196,29 +197,33 @@ class FixturesGenerator(object):
 
             self.WORKSHEETS_LIST.append(w)
 
-    def generate_orders(self, orders):
+    def generate_orders(self, orders, offer=None):
         """
         fill Order table
         :param orders: 
+        :param offer: set Offer manual
         :return: 
         """
         passed = []
         status_list = [s[0] for s in Order.STATES]
+        orders_list = []
         for i in range(orders):
             worksheet = random.sample(self.WORKSHEETS_LIST, 1)[0]
-            offer = random.sample(self.OFFERS_LIST, 1)[0]
+            o = offer or random.sample(self.OFFERS_LIST, 1)[0]
 
             if (worksheet, offer) in passed:
                 continue
 
             status = random.sample(status_list, 1)[0]
-            Order.objects.create(
+            o = Order.objects.create(
                 sent=timezone.now() if status > 1 else None,
                 worksheet=worksheet,
-                offer=offer,
+                offer=o,
                 status=status
             )
             passed.append((worksheet, offer))
+            orders_list.append(o)
+        return orders_list
 
     def generate_all(self, cred_orgs_count, partners_count, offers_count,
                      worksheets_count, orders_count):

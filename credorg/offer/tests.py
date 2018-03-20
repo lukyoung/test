@@ -20,7 +20,6 @@ log = logging.getLogger('file')
 class CreditOrganizationTestCase(TestCase):
     def setUp(self):
         self.fg = FixturesGenerator()
-        self.fg.generate_all(3, 3, 10, 10, 100)
 
     def test_get_token_no_token_error(self):
         """
@@ -72,7 +71,8 @@ class CreditOrganizationTestCase(TestCase):
         self.assertEqual(res.status_code, 403)
 
     def test_create_worksheet_by_partner_with_wrong_data(self):
-        partner = self.fg.PARTNERS_LIST[0]
+        self.fg.clear_db()
+        partner = self.fg.generate_partners(1)[0]
         name = self.fg.gen_name()
         first_name, last_name = name.split()
         score = self.fg.gen_score()
@@ -97,7 +97,8 @@ class CreditOrganizationTestCase(TestCase):
         self.assertIsNotNone(res.data.get('last_name'))
 
     def test_create_worksheet_by_partner(self):
-        partner = self.fg.PARTNERS_LIST[0]
+        self.fg.clear_db()
+        partner = self.fg.generate_partners(1)[0]
         token = Token.objects.get(user=partner.user)
 
         name = self.fg.gen_name()
@@ -128,8 +129,12 @@ class CreditOrganizationTestCase(TestCase):
         self.assertEqual(res.data['score'], score)
 
     def test_create_order(self):
-        partner = self.fg.PARTNERS_LIST[0]
-        offer = self.fg.OFFERS_LIST[0]
+        self.fg.clear_db()
+        self.fg.generate_cred_orgs(1)
+        self.fg.generate_offers(1)
+
+        partner = self.fg.generate_partners(1)[0]
+        offer = self.fg.generate_offers(1)[0]
         token = Token.objects.get(user=partner.user)
 
         # create Worksheet
@@ -168,8 +173,10 @@ class CreditOrganizationTestCase(TestCase):
         self.assertEqual(res.data['offer'], offer.id)
 
     def test_send_order(self):
-        partner = self.fg.PARTNERS_LIST[0]
-        offer = self.fg.OFFERS_LIST[0]
+        self.fg.clear_db()
+        partner = self.fg.generate_partners(1)[0]
+        self.fg.generate_cred_orgs(1)
+        offer = self.fg.generate_offers(1)[0]
         token = Token.objects.get(user=partner.user)
 
         # create Worksheet
@@ -215,7 +222,12 @@ class CreditOrganizationTestCase(TestCase):
         self.assertTrue(res.data['status'])
 
     def test_get_partner_orders(self):
-        partner = self.fg.PARTNERS_LIST[0]
+        self.fg.clear_db()
+        partner = self.fg.generate_partners(1)[0]
+        self.fg.generate_worksheets(3)
+        self.fg.generate_cred_orgs(1)
+        self.fg.generate_offers(3)
+        self.fg.generate_orders(3)
         token = Token.objects.get(user=partner.user)
 
         # send created Order to the CreditOrganization
@@ -229,7 +241,8 @@ class CreditOrganizationTestCase(TestCase):
         self.assertTrue(len(res.data) > 0)
 
     def test_get_credit_organization_orders(self):
-        co = self.fg.CRED_ORGS_LIST[0]
+        self.fg.clear_db()
+        co = self.fg.generate_cred_orgs(1)[0]
         token = Token.objects.get(user=co.user)
 
         # send created Order to the CreditOrganization
@@ -242,7 +255,9 @@ class CreditOrganizationTestCase(TestCase):
         self.assertIsInstance(res.data, list)
 
     def test_get_worksheets(self):
-        partner = self.fg.PARTNERS_LIST[0]
+        self.fg.clear_db()
+        partner = self.fg.generate_partners(1)[0]
+        self.fg.generate_worksheets(3)
         token = Token.objects.get(user=partner.user)
 
         client = APIClient()
@@ -251,10 +266,12 @@ class CreditOrganizationTestCase(TestCase):
 
         self.assertEqual(res.status_code, 200)
         self.assertIsInstance(res.data, list)
-        self.assertTrue(len(res.data) > 0)
+        self.assertTrue(len(res.data) == 3)
 
     def test_get_offers(self):
-        co = self.fg.CRED_ORGS_LIST[0]
+        self.fg.clear_db()
+        co = self.fg.generate_cred_orgs(1)[0]
+        self.fg.generate_offers(3)
         token = Token.objects.get(user=co.user)
 
         client = APIClient()
@@ -263,15 +280,26 @@ class CreditOrganizationTestCase(TestCase):
 
         self.assertEqual(res.status_code, 200)
         self.assertIsInstance(res.data, list)
-        self.assertTrue(len(res.data) > 0)
+        self.assertTrue(len(res.data) == 3)
 
     def test_update_alien_order_status(self):
-        co = self.fg.CRED_ORGS_LIST[0]
-        order = Order.objects.exclude(offer__credit_organization=co).first()
+        self.fg.clear_db()
+
+        self.fg.generate_partners(1)
+        self.fg.generate_worksheets(1)
+
+        co = self.fg.generate_cred_orgs(1)[0]
+        offer_co = self.fg.generate_offers(1, co=co)[0]
+        self.fg.generate_orders(1, offer=offer_co)
+
+        co2 = self.fg.generate_cred_orgs(1)[0]
+        offer_co2 = self.fg.generate_offers(1, co=co2)[0]
+        order_co2 = self.fg.generate_orders(1, offer=offer_co2)[0]
+
         token = Token.objects.get(user=co.user)
 
         data = dict(
-            order=order.id,
+            order=order_co2.id,
             status=Order.RECEIVED
         )
 
@@ -283,7 +311,12 @@ class CreditOrganizationTestCase(TestCase):
         self.assertEqual(res.status_code, 403)
 
     def test_update_own_order_status(self):
-        co = self.fg.CRED_ORGS_LIST[0]
+        self.fg.clear_db()
+        self.fg.generate_partners(1)
+        self.fg.generate_worksheets(1)
+        co = self.fg.generate_cred_orgs(1)[0]
+        offer_co = self.fg.generate_offers(1, co=co)[0]
+        self.fg.generate_orders(1, offer=offer_co)
         order = Order.objects.filter(offer__credit_organization=co).first()
         token = Token.objects.get(user=co.user)
 

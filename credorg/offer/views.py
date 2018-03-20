@@ -6,8 +6,8 @@ from rest_framework.decorators import list_route, detail_route
 from rest_framework.response import Response
 
 from .models import Partner, Order, CreditOrganization, Offer, ClientWorksheet
-from .serializers import WorksheetSerializer, OrderSerializer,\
-    OfferSerializer, GetTokenCredsSerializer
+from .serializers import WorksheetSerializer, OrderSerializer, \
+    OrderSerializerDepth, OfferSerializer, GetTokenCredsSerializer
 from .permissions import IsPartnerUser, IsPartnerOrder, \
     IsCreditOrganizationUser, IsCreditOrganizationOrder
 from .schemes import PartnerViewSchema, CreditOrganizationViewSchema, \
@@ -217,7 +217,7 @@ class CreditOrganizationViewSet(viewsets.ViewSet):
             return Response(dict(error='Order not found!'), 404)
 
         else:
-            return Response(OrderSerializer(order).data)
+            return Response(OrderSerializerDepth(order).data)
 
     @list_route(['put'], url_path='Status', url_name='update-order-status',
                 permission_classes=[IsCreditOrganizationOrder])

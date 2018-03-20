@@ -33,6 +33,12 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = ('id', 'sent', 'worksheet', 'offer', 'status')
+
+
+class OrderSerializerDepth(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ('id', 'sent', 'worksheet', 'offer', 'status')
         depth = 1
 
 
