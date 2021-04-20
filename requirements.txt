@@ -21,7 +21,7 @@ names==0.3.0
 openapi-codec==1.3.2
 pkg-resources==0.0.0
 pluggy==0.6.0
-py==1.5.2
+py==1.10.0
 pytest==3.4.2
 pytz==2018.3
 redis==2.10.6
